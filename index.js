@@ -1,3 +1,5 @@
+require('dotenv').config(); // <-- agregar al inicio
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -7,8 +9,9 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Reemplaza con tu URI real de MongoDB (local o Atlas)
-const mongoURI = 'mongodb+srv://allrg1104:vL4leF1sPmgI5w2Z@cluster0.xtqyw.mongodb.net/BD_arduino?retryWrites=true&w=majority&appName=Cluster0';
+// Leer URI y puerto desde variables de entorno
+const mongoURI = process.env.MONGO_URI;
+const PORT = process.env.PORT || 3000;
 
 // Conexión a MongoDB
 mongoose.connect(mongoURI, {
@@ -54,7 +57,7 @@ app.get('/api/datos', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+
