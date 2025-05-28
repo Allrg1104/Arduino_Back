@@ -1,4 +1,4 @@
-require('dotenv').config(); // <-- agregar al inicio
+require('dotenv').config(); // Carga las variables desde .env
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -9,27 +9,25 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Leer URI y puerto desde variables de entorno
+// Conexión a MongoDB desde .env
 const mongoURI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 3000;
 
-// Conexión a MongoDB
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('Conectado a MongoDB'))
-.catch((err) => console.error('Error de conexión a MongoDB:', err));
+.then(() => console.log('✅ Conectado a MongoDB'))
+.catch((err) => console.error('❌ Error al conectar a MongoDB:', err));
 
-// Esquema y modelo para los registros
+// Esquema de datos
 const registroSchema = new mongoose.Schema({
   fechaHora: { type: String, required: true },
   dato: { type: String, required: true }
 });
-
 const Registro = mongoose.model('Registro', registroSchema);
 
-// Endpoint para recibir datos del botón y la fecha/hora
+// POST: Guardar dato
 app.post('/api/datos', async (req, res) => {
   const { fechaHora, dato } = req.body;
   if (!fechaHora || !dato) {
@@ -39,25 +37,25 @@ app.post('/api/datos', async (req, res) => {
   try {
     const nuevoRegistro = new Registro({ fechaHora, dato });
     await nuevoRegistro.save();
-    console.log('Dato guardado en MongoDB:', fechaHora, dato);
+    console.log('📥 Guardado:', fechaHora, dato);
     res.json({ mensaje: 'Dato guardado en MongoDB' });
   } catch (error) {
-    console.error('Error al guardar en MongoDB:', error);
+    console.error('❌ Error al guardar:', error);
     res.status(500).json({ error: 'Error al guardar en la base de datos' });
   }
 });
 
-// Endpoint para ver todos los registros
+// GET: Obtener datos
 app.get('/api/datos', async (req, res) => {
   try {
-    const registros = await Registro.find();
+    const registros = await Registro.find().sort({ _id: -1 });
     res.json(registros);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener los datos' });
   }
 });
 
+// Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
-
